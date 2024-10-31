@@ -23,4 +23,4 @@ $\phi_{TSd_R}$ | 3 | 1 | +2/3
 $\phi_{OD}$ | 8 | 2 | +1/2
 
 
-Both the .fr files and the UFO file are provided, ready to use.
+Both the .fr files and the UFO file are provided, ready to use. The .fr files contains only the diquark extensions and are meant to be merged with the SM.fr wich provides the SM parts.
