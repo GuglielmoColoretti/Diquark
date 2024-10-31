@@ -1,0 +1,130 @@
+M$ModelName = "diquark_ST";
+
+M$Information = {
+   Authors -> {"Flynn Linton"},
+   Institutions -> {"ETH Zurich"},
+   Emails -> {"flinton@student.ethz.ch"},
+   Version -> {"1.0"}
+   };
+
+(****************************)
+(*****   GROUP THEORY   *****)
+(****************************)
+
+(*** GROUP THEORY INDICES ***)
+IndexRange[Index[Sextet]] = NoUnfold[Range[6]]; (* SU(3) sextet *)
+IndexStyle[Sextet, u];
+AddGaugeRepresentation[SU3C -> {T6, Sextet}];
+
+
+(****************************)
+(****   DIQUARK FIELDS   ****)
+(****************************)
+
+M$ClassesDescription = {
+
+  (*** UNPHYSICAL FIELDS ***)
+
+  S[21] == { 
+    ClassName -> DiqST,
+    SelfConjugate -> False,
+    Indices -> {Index[Sextet], Index[SU2W]},
+    QuantumNumbers -> {Y -> 1/3}, 
+    Definitions -> {DiqST[a_, 1] -> (DiqSTM[a] + DiqSTP[a])/Sqrt[2], 
+      DiqST[a_, 2] -> I (DiqSTM[a] - DiqSTP[a])/Sqrt[2], 
+      DiqST[a_, 3] -> DiqSTN[a]},
+    ParticleName -> "DiqST",
+    FullName -> "DiqST",
+    Unphysical -> True
+    },
+  
+  (*** PHYSICAL FIELDS ***)
+
+  (* SU2L triplet *)
+  (* NOTE: DiqST -> SU3 6, DiqSTbar -> SU3 6bar*)
+  S[211] == { (* T3 = +1 *)
+    ClassName -> DiqSTP,
+    SelfConjugate -> False,
+    Indices -> {Index[Sextet]},
+    QuantumNumbers -> {(*Y -> 1/3,*) Q -> -2/3},
+    Mass -> {MdqST, 1},
+    Width -> {WdqST, auto},
+    PropagatorLabel -> "DiqSTP-2/3",
+    PropagatorArrow -> True,
+    PropagatorType -> Dashes,
+    ParticleName -> "DiqSTP",
+    FullName -> "DiqSTP",
+    PDG -> 9990000
+    },
+  
+  S[212] == { (* T3 = 0 *)
+    ClassName -> DiqSTN,
+    SelfConjugate -> False,
+    Indices -> {Index[Sextet]},
+    QuantumNumbers -> {(*Y -> 1/3,*) Q -> 1/3},
+    Mass -> {MdqST, 1},
+    Width -> {WdqST, auto},
+    PropagatorLabel -> "DiqSTN+1/3",
+    PropagatorArrow -> True,
+    PropagatorType -> Dashes,
+    ParticleName -> "DiqSTN",
+    FullName -> "DiqSTN",
+    PDG -> 9990001
+    },
+  
+  S[213] == { (* T3 = -1 *)
+    ClassName -> DiqSTM,
+    SelfConjugate -> False,
+    Indices -> {Index[Sextet]},
+    QuantumNumbers -> {(*Y -> 1/3,*) Q -> 4/3},
+    Mass -> {MdqST, 1},
+    Width -> {WdqST, auto},
+    PropagatorLabel -> "DiqSTM+4/3",
+    PropagatorArrow -> True,
+    PropagatorType -> Dashes,
+    ParticleName -> "DiqSTM",
+    FullName -> "DiqSTM",
+    PDG -> 9990002
+    }
+  }
+
+(****************************)
+(******   PARAMETERS   ******)
+(****************************)
+
+M$Parameters = {
+
+  (*** DIQUARK COUPLINGS ***)
+
+  QLQLst == {
+		BlockName -> DiqQLQLst,
+    Indices -> {Index[Generation], Index[Generation]},
+    Definitions -> 
+     QLQLst[i_, j_] :> 0 /; NumericQ[i] && NumericQ[j] && (i != j),
+    Value -> {
+      QLQLst[1, 1] -> 0.1,
+      QLQLst[2, 2] -> 0.1,
+      QLQLst[3, 3] -> 0.1
+      },
+    InteractionOrder -> {QCD, 1},
+    ParameterType -> External
+    }
+  }
+
+(****************************)
+(******   Lagrangian   ******)
+(****************************)
+
+(*** DIQUARK KINETIC ***)
+
+(* (D_mu Phi)* (D^mu Phi) - m^2 Phi *)
+LdqKinST = DC[DiqSTbar[r, k], mu]*DC[DiqST[r, k], mu] - 
+          MdqST^2*(DiqSTbar[r, k]*DiqST[r, k]);
+
+(*** DIQUARK INT ***)
+
+(* QbarL^c QL Phi_ST *)
+LdqST1 = QLQLst[a, b]*(CC[QLbar][sp, m, a, i]*QL[sp, l, b, j]*Eps[m, n])*(K6[r, i, j]*DiqSTbar[r, k]*PauliSigma[k, n, l]/2);
+LdqIntST = LdqST1 + HC[LdqST1];
+
+LdqST = LdqKinST + LdqIntST;

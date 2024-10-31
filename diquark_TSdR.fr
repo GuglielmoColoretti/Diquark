@@ -1,0 +1,73 @@
+M$ModelName = "diquark_TSdR";
+
+M$Information = {
+   Authors -> {"Flynn Linton"},
+   Institutions -> {"ETH Zurich"},
+   Emails -> {"flinton@student.ethz.ch"},
+   Version -> {"1.0"}
+   };
+
+(****************************)
+(****   DIQUARK FIELDS   ****)
+(****************************)
+
+M$ClassesDescription = {
+  
+  (*** PHYSICAL FIELDS ***)
+
+  S[28] == {
+    ClassName -> DiqTSdR,
+    SelfConjugate -> False,
+    Indices -> {Index[Colour]}, 
+    QuantumNumbers -> {(*Y -> 2/3,*) Q -> 2/3}, 
+    Mass -> {MdqTSdR, 1},
+    Width -> {WdqTSdR, auto},
+    PropagatorLabel -> "DiqTSdR-2/3",
+    PropagatorArrow -> True,
+    PropagatorType -> Dashes,
+    ParticleName -> "DiqTSdR",
+    FullName -> "DiqTSdR",
+    PDG -> 9990011
+    }
+  }
+
+(****************************)
+(******   PARAMETERS   ******)
+(****************************)
+
+M$Parameters = {
+
+  (*** DIQUARK COUPLINGS ***)
+
+  dRdRts == {
+		BlockName -> DiqdRdRts,
+    Indices -> {Index[Generation], Index[Generation]},
+    Definitions -> 
+     dRdRts[i_, j_] :> 0 /; NumericQ[i] && NumericQ[j] && (i != j),
+    Value -> {
+      dRdRts[1, 1] -> 0.1,
+      dRdRts[2, 2] -> 0.1,
+      dRdRts[3, 3] -> 0.1
+      },
+    InteractionOrder -> {QCD, 1},
+    ParameterType -> External
+    }
+  }
+
+(****************************)
+(******   Lagrangian   ******)
+(****************************)
+
+(*** DIQUARK KINETIC ***)
+
+(* (D_mu Phi)* (D^mu Phi) - m^2 Phi *)
+LdqKinTSdR = DC[DiqTSdRbar[r], mu]*DC[DiqTSdR[r], mu] - 
+             MdqTSdR^2*(DiqTSdRbar[r]*DiqTSdR[r]);
+
+(*** DIQUARK INT ***)
+
+(* dbarR^c dR Phi_TSdR *)
+LdqTSdR1 = Eps[a, c]*dRdRts[c, b]*(ProjP[m, n]*CC[dqbar][m, a, i]*dq[n, b, j])*(K3[r, i, j]*DiqTSdR[r]);
+LdqIntTSdR = LdqTSdR1 + HC[LdqTSdR1];
+
+LdqTSdR = LdqKinTSdR + LdqIntTSdR;

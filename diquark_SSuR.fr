@@ -1,0 +1,83 @@
+M$ModelName = "diquark_SSuR";
+
+M$Information = {
+   Authors -> {"Flynn Linton"},
+   Institutions -> {"ETH Zurich"},
+   Emails -> {"flinton@student.ethz.ch"},
+   Version -> {"1.0"}
+   };
+
+(****************************)
+(*****   GROUP THEORY   *****)
+(****************************)
+
+(*** GROUP THEORY INDICES ***)
+IndexRange[Index[Sextet]] = NoUnfold[Range[6]]; (* SU(3) sextet *)
+IndexStyle[Sextet, u];
+AddGaugeRepresentation[SU3C -> {T6, Sextet}];
+
+
+(****************************)
+(****   DIQUARK FIELDS   ****)
+(****************************)
+
+M$ClassesDescription = {
+  
+  (*** PHYSICAL FIELDS ***)
+
+  S[25] == {  (* NOTE: DiqSSuR -> SU3 6, DiqSSuRbar -> SU3 6bar*)
+    ClassName -> DiqSSuR,
+    SelfConjugate -> False,
+    Indices -> {Index[Sextet]},
+    QuantumNumbers -> {(*Y -> 4/3,*) Q -> 4/3},
+    Mass -> {MdqSSuR, 1},
+    Width -> {WdqSSuR, auto},
+    PropagatorLabel -> "DiqSSuR+4/3",
+    PropagatorArrow -> True,
+    PropagatorType -> Dashes,
+    ParticleName -> "DiqSSuR",
+    FullName -> "DiqSSuR",
+    PDG -> 9990008
+    }
+  }
+
+(****************************)
+(******   PARAMETERS   ******)
+(****************************)
+
+M$Parameters = {
+
+  (*** DIQUARK COUPLINGS ***)
+
+  uRuRss == {
+		BlockName -> DiquRuRss,
+    Indices -> {Index[Generation], Index[Generation]},
+    Definitions -> 
+     uRuRss[i_, j_] :> 0 /; NumericQ[i] && NumericQ[j] && (i != j),
+    Value -> {
+      uRuRss[1, 1] -> 0.1,
+      uRuRss[2, 2] -> 0.1,
+      uRuRss[3, 3] -> 0.1
+      },
+    InteractionOrder -> {QCD, 1},
+    ParameterType -> External
+    }
+  }
+
+(****************************)
+(******   Lagrangian   ******)
+(****************************)
+
+(*** DIQUARK KINETIC ***)
+
+(* (D_mu Phi)* (D^mu Phi) - m^2 Phi *)
+LdqKinSSuR = DC[DiqSSuRbar[r], mu]*DC[DiqSSuR[r], mu] - 
+             MdqSSuR^2*(DiqSSuRbar[r]*DiqSSuR[r]);
+
+(*** DIQUARK INT ***)
+
+(* ubarR^c uR Phi_SSuR *)
+LdqSSuR1 = uRuRss[a, b]*(ProjP[m, n]*CC[uqbar][m, a, i]*uq[n, b, j])*(K6[r, i, j]*DiqSSuRbar[r]);
+LdqIntSSuR = LdqSSuR1 + HC[LdqSSuR1];
+
+LdqSSuR = LdqKinSSuR + LdqIntSSuR;

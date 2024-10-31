@@ -1,0 +1,120 @@
+M$ModelName = "diquark_OD";
+
+M$Information = {
+   Authors -> {"Flynn Linton"},
+   Institutions -> {"ETH Zurich"},
+   Emails -> {"flinton@student.ethz.ch"},
+   Version -> {"1.0"}
+   };
+
+(****************************)
+(****   DIQUARK FIELDS   ****)
+(****************************)
+
+M$ClassesDescription = {
+  
+  (*** UNPHYSICAL FIELDS ***)
+
+    S[29] == {
+    ClassName -> DiqOD,
+    SelfConjugate -> False,
+    Indices -> {Index[Gluon], Index[SU2D]},
+    QuantumNumbers -> {Y -> 1/2},
+    Definitions -> {DiqOD[a_, 1] -> DiqODP[a], DiqOD[a_, 2] -> DiqODN[a]}, 
+    ParticleName -> "DiqOD",
+    FullName -> "DiqOD",
+    Unphysical -> True
+    },
+
+  (*** PHYSICAL FIELDS ***)
+
+  (* SU2L doublet *)
+  S[291] == { (* T3 = +1/2 *)
+    ClassName -> DiqODP,
+    SelfConjugate -> False,
+    Indices -> {Index[Gluon]},
+    QuantumNumbers -> {(*Y -> 1/2,*) Q -> 1},
+    Mass -> {MdqOD, 1},
+    Width -> {WdqOD, auto},
+    PropagatorLabel -> "DiqODP+1",
+    PropagatorArrow -> True,
+    PropagatorType -> Dashes,
+    ParticleName -> "DiqODP",
+    FullName -> "DiqODP",
+    PDG -> 9990012
+    },
+  
+  S[292] == { (* T3 = -1/2 *)
+    ClassName -> DiqODN,
+    SelfConjugate -> False,
+    Indices -> {Index[Gluon]},
+    QuantumNumbers -> {(*Y -> 1/2,*) Q -> 0},
+    Mass -> {MdqOD, 1},
+    Width -> {WdqOD, auto},
+    PropagatorLabel -> "DiqODN+0",
+    PropagatorArrow -> True,
+    PropagatorType -> Dashes,
+    ParticleName -> "DiqODN",
+    FullName -> "DiqODN",
+    PDG -> 9990013
+    }
+  }
+
+(****************************)
+(******   PARAMETERS   ******)
+(****************************)
+
+M$Parameters = {
+
+  (*** DIQUARK COUPLINGS ***)
+
+  QLdRod == {
+		BlockName -> DiqQLdRod,
+    Indices -> {Index[Generation], Index[Generation]},
+    Definitions -> 
+     QLdRod[i_, j_] :> 0 /; NumericQ[i] && NumericQ[j] && (i != j),
+    Value -> {
+      QLdRod[1, 1] -> 0.1,
+      QLdRod[2, 2] -> 0.1,
+      QLdRod[3, 3] -> 0.1
+      },
+    InteractionOrder -> {QCD, 1},
+    ParameterType -> External
+    },
+  
+  QLuRod == {
+		BlockName -> DiqQLuRod,
+    Indices -> {Index[Generation], Index[Generation]},
+    Definitions -> 
+     QLuRod[i_, j_] :> 0 /; NumericQ[i] && NumericQ[j] && (i != j),
+    Value -> {
+      QLuRod[1, 1] -> 0.1,
+      QLuRod[2, 2] -> 0.1,
+      QLuRod[3, 3] -> 0.1
+      },
+    InteractionOrder -> {QCD, 1},
+    ParameterType -> External
+    }
+  }
+
+(****************************)
+(******   Lagrangian   ******)
+(****************************)
+
+(*** DIQUARK KINETIC ***)
+
+(* (D_mu Phi)* (D^mu Phi) - m^2 Phi *)
+LdqKinOD = DC[DiqODbar[r, m], mu]*DC[DiqOD[r, m], mu] - 
+           MdqOD^2*(DiqODbar[r, m]*DiqOD[r, m]);
+
+(*** DIQUARK INT ***)
+
+(* QbarL dR Phi_OD + QbarL uR Phi_OD^c *)
+LdqOD1 = QLdRod[a, b]*(QLbar[sp, m, a, i]*dR[sp, b, j])*(T[r, i, j]*DiqOD[r, m]) + 
+        QLuRod[a, b]*(QLbar[sp, m, a, i]*uR[sp, b, j])*(T[r, i, j]*Eps[m, n]*DiqODbar[r, n]); 
+        
+        (* Notice that, since DC is i*T, T is Hermitian  and 3x3x8bar = 3x3x8 *)
+
+LdqIntOD = LdqOD1 + HC[LdqOD1];
+
+LdqOD = LdqKinOD + LdqIntOD;

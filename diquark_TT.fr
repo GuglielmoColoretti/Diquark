@@ -1,0 +1,119 @@
+M$ModelName = "diquark_TT";
+
+M$Information = {
+   Authors -> {"Flynn Linton"},
+   Institutions -> {"ETH Zurich"},
+   Emails -> {"flinton@student.ethz.ch"},
+   Version -> {"1.0"}
+   };
+
+(****************************)
+(****   DIQUARK FIELDS   ****)
+(****************************)
+
+M$ClassesDescription = {
+
+  (*** UNPHYSICAL FIELDS ***)
+
+  S[22] == {
+    ClassName -> DiqTT,
+    SelfConjugate -> False,
+    Indices -> {Index[Colour], Index[SU2W]},
+    QuantumNumbers -> {Y -> -1/3},
+    Definitions -> {DiqTT[a_, 1] -> (DiqTTM[a] + DiqTTP[a])/Sqrt[2], 
+      DiqTT[a_, 2] -> -I (DiqTTM[a] - DiqTTP[a])/Sqrt[2],
+      DiqTT[a_, 3] -> DiqTTN[a]},
+    ParticleName -> "DiqTT",
+    FullName -> "DiqTT",
+    Unphysical -> True
+    },
+  
+  (*** PHYSICAL FIELDS ***)
+
+  (* SU2L triplet *)
+  S[221] == { (* T3 = +1 *)
+    ClassName -> DiqTTP,
+    SelfConjugate -> False,
+    Indices -> {Index[Colour]},
+    QuantumNumbers -> {(*Y -> -1/3,*) Q -> 2/3},
+    Mass -> {MdqTT, 1},
+    Width -> {WdqTT, auto},
+    PropagatorLabel -> "DiqTTP+2/3",
+    PropagatorArrow -> True,
+    PropagatorType -> Dashes,
+    ParticleName -> "DiqTTP",
+    FullName -> "DiqTTP",
+    PDG -> 9990003
+    },
+  
+  S[222] == { (* T3 = 0 *)
+    ClassName -> DiqTTN,
+    SelfConjugate -> False,
+    Indices -> {Index[Colour]},
+    QuantumNumbers -> {(*Y -> -1/3,*) Q -> -1/3},
+    Mass -> {MdqTT, 1},
+    Width -> {WdqTT, auto},
+    PropagatorLabel -> "DiqTTN-1/3",
+    PropagatorArrow -> True,
+    PropagatorType -> Dashes,
+    ParticleName -> "DiqTTN",
+    FullName -> "DiqTTN",
+    PDG -> 9990004
+    },
+  
+  S[223] == { (* T3 = -1 *)
+    ClassName -> DiqTTM,
+    SelfConjugate -> False,
+    Indices -> {Index[Colour]},
+    QuantumNumbers -> {(*Y -> -1/3,*) Q -> -4/3},
+    Mass -> {MdqTT, 1},
+    Width -> {WdqTT, auto},
+    PropagatorLabel -> "DiqTTM-4/3",
+    PropagatorArrow -> True,
+    PropagatorType -> Dashes,
+    ParticleName -> "DiqTTM",
+    FullName -> "DiqTTM",
+    PDG -> 9990005
+    }
+  }
+
+(****************************)
+(******   PARAMETERS   ******)
+(****************************)
+
+M$Parameters = {
+
+  (*** DIQUARK COUPLINGS ***)
+
+  QLQLtt == {
+		BlockName -> DiqQLQLtt,
+    Indices -> {Index[Generation], Index[Generation]},
+    Definitions -> 
+     QLQLtt[i_, j_] :> 0 /; NumericQ[i] && NumericQ[j] && (i != j),
+    Value -> {
+      QLQLtt[1, 1] -> 0.1,
+      QLQLtt[2, 2] -> 0.1,
+      QLQLtt[3, 3] -> 0.1
+      },
+    InteractionOrder -> {QCD, 1},
+    ParameterType -> External
+    }
+  }
+
+(****************************)
+(******   Lagrangian   ******)
+(****************************)
+
+(*** DIQUARK KINETIC ***)
+
+(* (D_mu Phi)* (D^mu Phi) - m^2 Phi *)
+LdqKinTT = DC[DiqTTbar[r, k], mu]*DC[DiqTT[r, k], mu] - 
+           MdqTT^2*(DiqTTbar[r, k]*DiqTT[r, k]);
+
+(*** DIQUARK INT ***)
+
+(* QbarL^c QL Phi_TT *)
+LdqTT1 = Eps[a, c]*QLQLtt[c, b]*(CC[QLbar][sp, m, a, i]*QL[sp, l, b, j]*Eps[m, n])*(K3[r, i, j]*DiqTT[r, k]*PauliSigma[k, n, l]/2);
+LdqIntTT = LdqTT1 + HC[LdqTT1];
+
+LdqTT = LdqKinTT + LdqIntTT;

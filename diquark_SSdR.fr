@@ -1,0 +1,83 @@
+M$ModelName = "diquark_SSdR";
+
+M$Information = {
+   Authors -> {"Flynn Linton"},
+   Institutions -> {"ETH Zurich"},
+   Emails -> {"flinton@student.ethz.ch"},
+   Version -> {"1.0"}
+   };
+
+(****************************)
+(*****   GROUP THEORY   *****)
+(****************************)
+
+(*** GROUP THEORY INDICES ***)
+IndexRange[Index[Sextet]] = NoUnfold[Range[6]]; (* SU(3) sextet *)
+IndexStyle[Sextet, u];
+AddGaugeRepresentation[SU3C -> {T6, Sextet}];
+
+
+(****************************)
+(****   DIQUARK FIELDS   ****)
+(****************************)
+
+M$ClassesDescription = {
+  
+  (*** PHYSICAL FIELDS ***)
+
+  S[27] == {  (* NOTE: DiqSSdR -> SU3 6, DiqSSdRbar -> SU3 6bar*)
+    ClassName -> DiqSSdR,
+    SelfConjugate -> False,
+    Indices -> {Index[Sextet]}, 
+    QuantumNumbers -> {(*Y -> -2/3,*) Q -> -2/3}, 
+    Mass -> {MdqSSdR, 1},
+    Width -> {WdqSSdR, auto},
+    PropagatorLabel -> "DiqSSdR-2/3",
+    PropagatorArrow -> True,
+    PropagatorType -> Dashes,
+    ParticleName -> "DiqSSdR",
+    FullName -> "DiqSSdR",
+    PDG -> 9990010
+    }
+  }
+
+(****************************)
+(******   PARAMETERS   ******)
+(****************************)
+
+M$Parameters = {
+
+  (*** DIQUARK COUPLINGS ***)
+
+  dRdRss == {
+		BlockName -> DiqdRdRss,
+    Indices -> {Index[Generation], Index[Generation]},
+    Definitions -> 
+     dRdRss[i_, j_] :> 0 /; NumericQ[i] && NumericQ[j] && (i != j),
+    Value -> {
+      dRdRss[1, 1] -> 0.1,
+      dRdRss[2, 2] -> 0.1,
+      dRdRss[3, 3] -> 0.1
+      },
+    InteractionOrder -> {QCD, 1},
+    ParameterType -> External
+    }
+  }
+
+(****************************)
+(******   Lagrangian   ******)
+(****************************)
+
+(*** DIQUARK KINETIC ***)
+
+(* (D_mu Phi)* (D^mu Phi) - m^2 Phi *)
+LdqKinSSdR = DC[DiqSSdRbar[r], mu]*DC[DiqSSdR[r], mu] - 
+             MdqSSdR^2*(DiqSSdRbar[r]*DiqSSdR[r]);
+
+(*** DIQUARK INT ***)
+
+(* dbarR^c dR Phi_SSdR *)
+LdqSSdR1 = dRdRss[a, b]*(ProjP[m, n]*CC[dqbar][m, a, i]*dq[n, b, j])*(K6[r, i, j]*DiqSSdRbar[r]);
+LdqIntSSdR = LdqSSdR1 + HC[LdqSSdR1];
+
+LdqSSdR = LdqKinSSdR + LdqIntSSdR;
