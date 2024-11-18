@@ -20,7 +20,7 @@ M$ClassesDescription = {
     SelfConjugate -> False,
     Indices -> {Index[Gluon], Index[SU2D]},
     QuantumNumbers -> {Y -> 1/2},
-    Definitions -> {DiqOD[a_, 1] -> DiqODP[a], DiqOD[a_, 2] -> DiqODN[a]}, 
+    Definitions -> {DiqOD[aa_, 1] :> DiqODP[aa], DiqOD[aa_, 2] :> DiqODN[aa]}, 
     ParticleName -> "DiqOD",
     FullName -> "DiqOD",
     Unphysical -> True
@@ -104,17 +104,23 @@ M$Parameters = {
 (*** DIQUARK KINETIC ***)
 
 (* (D_mu Phi)* (D^mu Phi) - m^2 Phi *)
-LdqKinOD = DC[DiqODbar[r, m], mu]*DC[DiqOD[r, m], mu] - 
-           MdqOD^2*(DiqODbar[r, m]*DiqOD[r, m]);
 
+LdqKinOD := Block[{m,r,mu},
+
+			DC[DiqODbar[r, m], mu]*DC[DiqOD[r, m], mu] - 
+           		MdqOD^2*(DiqODbar[r, m]*DiqOD[r, m])
+]
 (*** DIQUARK INT ***)
 
 (* QbarL dR Phi_OD + QbarL uR Phi_OD^c *)
-LdqOD1 = QLdRod[a, b]*(QLbar[sp, m, a, i]*dR[sp, b, j])*(T[r, i, j]*DiqOD[r, m]) + 
-        QLuRod[a, b]*(QLbar[sp, m, a, i]*uR[sp, b, j])*(T[r, i, j]*Eps[m, n]*DiqODbar[r, n]); 
-        
-        (* Notice that, since DC is i*T, T is Hermitian  and 3x3x8bar = 3x3x8 *)
+LdqIntOD := Block[{a,b,c,m,i,j,r,sp,LdqOD1},
 
-LdqIntOD = LdqOD1 + HC[LdqOD1];
+			LdqOD1 = QLdRod[a, b]*(QLbar[sp, m, a, i]*dR[sp, b, j])*(T[r, i, j]*DiqOD[r, m]) + 
+			QLuRod[a, b]*(QLbar[sp, m, a, i]*uR[sp, b, j])*(T[r, i, j]*Eps[m, n]*DiqODbar[r, n]); 
+			
+			(* Notice that, since DC is i*T, T is Hermitian  and 3x3x8bar = 3x3x8 *)
+			LdqOD1 + HC[LdqOD1]					
+]
+
 
 LdqOD = LdqKinOD + LdqIntOD;

@@ -20,9 +20,9 @@ M$ClassesDescription = {
     SelfConjugate -> False,
     Indices -> {Index[Colour], Index[SU2W]},
     QuantumNumbers -> {Y -> -1/3},
-    Definitions -> {DiqTT[a_, 1] -> (DiqTTM[a] + DiqTTP[a])/Sqrt[2], 
-      DiqTT[a_, 2] -> -I (DiqTTM[a] - DiqTTP[a])/Sqrt[2],
-      DiqTT[a_, 3] -> DiqTTN[a]},
+    Definitions -> {DiqTT[aa_, 1] :> (DiqTTM[aa] + DiqTTP[aa])/Sqrt[2], 
+      DiqTT[aa_, 2] :> -I (DiqTTM[aa] - DiqTTP[aa])/Sqrt[2],
+      DiqTT[aa_, 3] :> DiqTTN[aa]},
     ParticleName -> "DiqTT",
     FullName -> "DiqTT",
     Unphysical -> True
@@ -75,7 +75,8 @@ M$ClassesDescription = {
     FullName -> "DiqTTM",
     PDG -> 9990005
     }
-  }
+    
+  };
 
 (****************************)
 (******   PARAMETERS   ******)
@@ -98,7 +99,7 @@ M$Parameters = {
     InteractionOrder -> {QCD, 1},
     ParameterType -> External
     }
-  }
+  };
 
 (****************************)
 (******   Lagrangian   ******)
@@ -107,13 +108,19 @@ M$Parameters = {
 (*** DIQUARK KINETIC ***)
 
 (* (D_mu Phi)* (D^mu Phi) - m^2 Phi *)
-LdqKinTT = DC[DiqTTbar[r, k], mu]*DC[DiqTT[r, k], mu] - 
-           MdqTT^2*(DiqTTbar[r, k]*DiqTT[r, k]);
+LdqKinTT := Block[{k,r,mu},
+
+			DC[DiqTTbar[r, k], mu]*DC[DiqTT[r, k], mu] - 
+			MdqTT^2*(DiqTTbar[r, k]*DiqTT[r, k])
+]
 
 (*** DIQUARK INT ***)
 
 (* QbarL^c QL Phi_TT *)
-LdqTT1 = Eps[a, c]*QLQLtt[c, b]*(CC[QLbar][sp, m, a, i]*QL[sp, l, b, j]*Eps[m, n])*(K3[r, i, j]*DiqTT[r, k]*PauliSigma[k, n, l]/2);
-LdqIntTT = LdqTT1 + HC[LdqTT1];
+LdqIntTT := Block[{a,b,c,l,m,sp,i,j,k,LdqTT1},
+
+		LdqTT1 = Eps[a, c]*QLQLtt[c, b]*(CC[QLbar][sp, m, a, i]*QL[sp, l, b, j]*Eps[m, n])*(K3[r, i, j]*DiqTT[r, k]*PauliSigma[k, n, l]/2);
+		LdqTT1 + HC[LdqTT1]
+]
 
 LdqTT = LdqKinTT + LdqIntTT;
